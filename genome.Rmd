@@ -14,4 +14,11 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-In this tutorial..
+In this tutorial, we're going to examine why full-genome assemblies can be useful in population genetic and phylogenetic studies. For practical reasons, we have to move away from salamanders (`r emo::ji("frowning_face")`), because the only [chromosome-level reference genome](https://genome.cshlp.org/content/29/2/317.long) is 32 Gb! Nobody wants to deal with that for a tutorial.
+
+Instead, we'll use some real data from the pygmy rabbit (*Brachylagus idahoensis*). This is a small, endangered species found in the western United States.
+
+<center>![](https://upload.wikimedia.org/wikipedia/commons/0/04/Brachylagus_idahoensis_NPS.jpg){width=40%}</center>
+
+\
+We generated 3RAD data for several individuals of this species, and we assembled them similar to how we earlier assembled *Urspelerpes* data for this course. Rather than start from these raw data, we're going to map the final loci to the reference genome.
