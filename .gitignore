@@ -37,3 +37,6 @@ rsconnect/
 
 # ipyrad assembly files
 reference/
+
+# figures
+figs/

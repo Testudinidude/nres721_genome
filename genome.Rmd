@@ -7,13 +7,29 @@ knit: (function(input_file, encoding) {
  output_file=file.path(dirname(input_file), out_dir, 'index.html'))})
 author: "Todd W. Pierson"
 date: "30 October 2019"
-output: html_document
+output: 
+  html_document:
+    toc: true
+    toc_depth: 2
+    toc_float: true
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+options(width=200)
 ```
 
+```{r, include = FALSE}
+library(devtools)
+```
+
+<div class="alert alert-danger">
+  <strong>Note:</strong> This brief tutorial is written for UNR's NRES 721 as a basic introduction to the utility of full-genome data. **Students, if you wish to follow along, you can download all of the data we'll use from the `/data` directory in the Github repository [here](https://github.com/twpierson/nres721_genome).**
+  
+Note on 24 October 2019: This page is still a work-in-progress, but will be completed before 30 October 2019.
+</div>
+
+## Introduction
 In this tutorial, we're going to examine why full-genome assemblies can be useful in population genetic and phylogenetic studies. For practical reasons, we have to move away from salamanders (`r emo::ji("frowning_face")`), because the only [chromosome-level reference genome](https://genome.cshlp.org/content/29/2/317.long) is 32 Gb! Nobody wants to deal with that for a tutorial.
 
 Instead, we'll use some real data from the pygmy rabbit (*Brachylagus idahoensis*). This is a small, endangered species found in the western United States.
@@ -22,3 +38,47 @@ Instead, we'll use some real data from the pygmy rabbit (*Brachylagus idahoensis
 
 \
 We generated 3RAD data for several individuals of this species, and we assembled them similar to how we earlier assembled *Urspelerpes* data for this course. Rather than start from these raw data, we're going to map the final loci to the reference genome.
+
+## What's in an assembled genome?
+
+In our previous tutorials, we've "assembled" RADseq data into loci. However, we don't know where those loci are physically located within a genome. When assembling full genomes, our primary goal is to take many sequence reads, overlap and map them, and end up with a full blueprint of the position of every nucleotide in the genome. In practice, this means aligning **reads** into **contigs** (i.e., contiguous sequences), assembling contigs into **scaffolds** (i.e., series of contigs, sometimes separated by gaps of known length), and eventually assembling those contigs into **chromosomes**, which are the natural physical units of DNA arrangement. This is often easier said than done, and many "genome assemblies" stop at the scaffold level.
+
+There are now myriad methods for generating sequence reads to be assembled into a genome, and researchers often use several methods to get a diversity of data. For example, the inclusion of some extremely long reads can be important for covering gaps among contigs and assembling larger scaffolds.
+
+Thus, simply put, a genome assembly is a map of the physical position of nucleotides on contigs, scaffolds, and chromosomes. Many times, a genome assembly you can download will be "annotated", which means that additional notes are included to indicate the location and putative function of genes.
+
+## Getting a genome
+
+The National Center for Biotechnology Information (NCBI) is a tremendous online resource for all kinds of genetic and genomic data—including full-genome assemblies. You can easily browse these resources through the [NCBI website](https://www.ncbi.nlm.nih.gov/). Using the dropdown menu near the top, you can select "Genome" and then search for an organism of interest. For example, search for "rabbit". It should then pull up the [full-genome assembly](https://www.ncbi.nlm.nih.gov/genome/?term=rabbit) for the European rabbit (*Oryctolagus cuniculus*), which is indeed the closest relative to our pygmy rabbits with such an assembly. One nifty tool for seeing how closely related these two species are is [TimeTree](http://timetree.org/). If we enter *Oryctolagus* and *Brachylagus* into the two slots on the website and hit enter, we can see an estimate generated from published studies.
+
+<center>![](figs/timetree.jpg){ width=60% }</center>
+
+We can already learn a few things about this assembly. For example, the "Assembly level" indicates that this is a chromosome-level assembly. We can click on the link below that (i.e., the assembly name) to learn more. On this new page, we can see much more information about the assembly, including its coverage, the sequencing technology used to generate it, and some summary statistics.
+
+<center>![](figs/ncbi2.jpg){ width=60% }</center>
+
+\
+
+<div class="alert alert-info">
+  <strong>Discussion:</strong> How does this compare to the size of the human genome?
+</div>
+
+Scrolling even further, we can look at the assembly information for each chromosome.
+
+Finally, we're ready to download the genome! We can do this by clicking the big blue "Download Assembly" button in the upper right hand corner. We want to keep the file type as "Genomic FASTA". **Note: You don't actually need to do this during class. This file is > 800 Mb, and it'll take a bit of time to download.**
+
+## Assembling loci in `bwa`
+As we learned two weeks ago, we could assemble our raw 3RAD reads against this genome in `ipyrad`. Today, we're going to do something even simpler. We'll take the final loci we assembled *de novo* and just map those against the genome assembly. 
+
+<div class="alert alert-info">
+  <strong>Discussion:</strong> What is a potential downside of assembling our data against the European rabbit genome?
+</div>
+
+## Interpreting results
+
+## Using Pronghorn
+As you've likely noticed throughout these tutorials, some of the methods we use in phylogenomics and population genomics are quite computationally intensive! Our example datasets are relatively small, but with even more data, the demands of these programs might far outpace what is available on your local computer.
+
+Fortunately, many research institutions support this kind of research through high-performance computing clusters, like the University of Nevada Reno's "Pronghorn". These are large and powerful groups of computers capable of conducting these analyses, and approved users can login remotely to do their work.
+
+In most cases, users need to run their programs by submitting a "job". This is special file that contains the command you want to run along with other important information (e.g., the kind of computing power you need, how long you'll need it, etc.). Pronghorn will then place your job in a queue and will run it once it's turn has come. 
