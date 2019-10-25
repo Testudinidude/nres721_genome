@@ -1,5 +1,10 @@
 ---
 title: "Utility of full-genome assemblies"
+output: 
+  html_document:
+    toc: true
+    toc_depth: 2
+    toc_float: true
 knit: (function(input_file, encoding) {
   out_dir <- 'docs';
   rmarkdown::render(input_file,
@@ -7,12 +12,15 @@ knit: (function(input_file, encoding) {
  output_file=file.path(dirname(input_file), out_dir, 'index.html'))})
 author: "Todd W. Pierson"
 date: "30 October 2019"
-output: 
-  html_document:
-    toc: true
-    toc_depth: 2
-    toc_float: true
 ---
+<style>
+pre code, pre, code {
+  white-space: pre !important;
+  overflow-x: scroll !important;
+  word-break: keep-all !important;
+  word-wrap: initial !important;
+}
+</style>
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -26,7 +34,7 @@ library(devtools)
 <div class="alert alert-danger">
   <strong>Note:</strong> This brief tutorial is written for UNR's NRES 721 as a basic introduction to the utility of full-genome data. **Students, if you wish to follow along, you can download all of the data we'll use from the `/data` directory in the Github repository [here](https://github.com/twpierson/nres721_genome).**
   
-Note on 24 October 2019: This page is still a work-in-progress, but will be completed before 30 October 2019.
+Note on 25 October 2019: This page is still a work-in-progress, but will be completed before 30 October 2019.
 </div>
 
 ## Introduction
@@ -49,21 +57,36 @@ Thus, simply put, a genome assembly is a map of the physical position of nucleot
 
 ## Getting a genome
 
-The National Center for Biotechnology Information (NCBI) is a tremendous online resource for all kinds of genetic and genomic data—including full-genome assemblies. You can easily browse these resources through the [NCBI website](https://www.ncbi.nlm.nih.gov/). Using the dropdown menu near the top, you can select "Genome" and then search for an organism of interest. For example, search for "rabbit". It should then pull up the [full-genome assembly](https://www.ncbi.nlm.nih.gov/genome/?term=rabbit) for the European rabbit (*Oryctolagus cuniculus*), which is indeed the closest relative to our pygmy rabbits with such an assembly. One nifty tool for seeing how closely related these two species are is [TimeTree](http://timetree.org/). If we enter *Oryctolagus* and *Brachylagus* into the two slots on the website and hit enter, we can see an estimate generated from published studies.
+The National Center for Biotechnology Information (NCBI) is a tremendous online resource for all kinds of genetic and genomic data—including full-genome assemblies. You can easily browse these resources through the [NCBI website](https://www.ncbi.nlm.nih.gov/). Using the dropdown menu near the top, you can select "Genome" and then search for an organism of interest. 
 
-<center>![](figs/timetree.jpg){ width=60% }</center>
+<center>![](figs/ncbi1.jpg){ width=100% }</center>
 
-We can already learn a few things about this assembly. For example, the "Assembly level" indicates that this is a chromosome-level assembly. We can click on the link below that (i.e., the assembly name) to learn more. On this new page, we can see much more information about the assembly, including its coverage, the sequencing technology used to generate it, and some summary statistics.
+\ 
 
-<center>![](figs/ncbi2.jpg){ width=60% }</center>
+For example, search for "rabbit". It should then pull up the [full-genome assembly](https://www.ncbi.nlm.nih.gov/genome/?term=rabbit) for the European rabbit (*Oryctolagus cuniculus*), which is indeed the closest relative to our pygmy rabbits with such an assembly. One nifty tool for seeing how closely related these two species are is [TimeTree](http://timetree.org/). If we enter *Oryctolagus* and *Brachylagus* into the two slots on the website and hit enter, we can see an estimate generated from published studies.
+
+<center>![](figs/timetree.jpg){ width=80% }</center>
+
+\
+Moving back to the NCBI page, we can already learn a few things about this assembly. For example, the "Assembly level" indicates that this is a chromosome-level assembly. We can click on the link below that (i.e., the assembly name) to open a [new page](https://www.ncbi.nlm.nih.gov/assembly/GCF_000003625.3/) and learn more. On this page, we can see much more information about the assembly, including its coverage, the sequencing technology used to generate it, and some summary statistics.
+
+<center>![](figs/ncbi2.jpg){ width=80% }</center>
 
 \
 
 <div class="alert alert-info">
-  <strong>Discussion:</strong> How does this compare to the size of the human genome?
+  <strong>Discussion:</strong> Hunt down the size of this full genome. How does this compare to the size of the human genome?
 </div>
 
-Scrolling even further, we can look at the assembly information for each chromosome.
+Scrolling even further, we can look at the assembly information for each chromosome. Notice the "RefSeq sequence" names; these will come in handy later when we map reads to the genome.
+
+<center>![](figs/ncbi3.jpg){ width=80% }</center>
+
+\
+
+<div class="alert alert-info">
+  <strong>Discussion:</strong> Note that this view doesn't show the mitochondrial genome. Where would we find that?
+</div>
 
 Finally, we're ready to download the genome! We can do this by clicking the big blue "Download Assembly" button in the upper right hand corner. We want to keep the file type as "Genomic FASTA". **Note: You don't actually need to do this during class. This file is > 800 Mb, and it'll take a bit of time to download.**
 
@@ -74,11 +97,171 @@ As we learned two weeks ago, we could assemble our raw 3RAD reads against this g
   <strong>Discussion:</strong> What is a potential downside of assembling our data against the European rabbit genome?
 </div>
 
+### Install `bwa` and `samtools`
+There exist various methods for mapping reads or loci against a reference genome. One popular method is the Burrows-Wheeler Aligner (`bwa`). You can download `bwa` from [here](https://sourceforge.net/projects/bio-bwa/files/), and installation instructions are available in various places online. We'll also use the program `samtools` to modify our output files; you can find installation instructions for this program [here](http://www.htslib.org/download/). **For the sake of time, I'm going to demonstrate how to align loci to the genome today, and you can just watch on my screen.** However, I've included all of the data necessary to do this yourself in the Github repository, so feel free to experiment on your own time.
+
+### Prepare reference genome
+Our first task is to "index" the reference genome. In brief, this is a process in which your computer organizing the reference genome in a fashion that optimizes the computational efficiency of the mapping. Assuming that we've placed our reference genome in a directory called `\reference` within our current working directoy, we can index by typing using the following command (**note**: again, this takes some time, so don't do this in class today**):
+
+```{bash, eval = FALSE}
+bwa index reference/GCF_000003625.3_OryCun2.0_genomic.fna
+```
+
+If we were to peek into the reference directory, we can now see that there are many more files than just the original `.fna` file.
+
+```{bash, comment = NA, eval = FALSE}
+(cd reference/* && ls -1 *)
+```
+
+```{bash, comment = NA, eval = TRUE, echo = FALSE}
+(cd /Volumes/G-DRIVE/Google_Drive/Projects/2019_Pygmy_Rabbit_Coyote_RADcap_Design/assemble_loci_against_reference/reference && ls -1 *Ory*)
+```
+
+### Map loci and export data
+Before mapping our loci, let's first take a look at how I've formatted our files.
+
+```{bash, comment = NA}
+head -n 10 data/Brid_R1.fasta
+```
+
+So, this is a FASTA with one line for each locus. In its paired file (`Brid_R2.fasta`), we have the same data for the R2 side of the loci. Now, we're ready to map these loci against the reference genome, and we can do this with the `bwa mem` command. Below, we use this command and use `samtools` to modify the output and export it as a BAM file.
+
+```{bash, eval = FALSE}
+bwa mem reference/GCF_000003625.3_OryCun2.0_genomic.fna data/Brid_R1.fasta loci_to_fasta/Brid_R2.fasta | samtools view -bS - | samtools sort - data/brid_R1_R2_mapped
+```
+
+Now, we'll again use `samtools` to export our BAM file to a readable .txt file.
+
+```{bash, eval = FALSE}
+samtools view data/brid_R1_R2_mapped.bam > data/brid_R1_R2_mapped.txt
+```
+
+We can take a peek at this file by using the `head` command:
+
+```{bash, comment = NA}
+head -n 10 data/brid_R1R2_mapped.txt
+```
+
+<div class="alert alert-info">
+  <strong>Discussion:</strong> Each line is a mapped location on the genome. What do you think the various columns represent? Hint: an answer to [this question](https://www.biostars.org/p/9637/) on Biostars is helpful.
+</div>
+
 ## Interpreting results
+
+### Filter loci
+Next, we'll move to `R` to view, filter, and plot some of these results. **Students: you can follow along here!**
+
+First, let's set working directory and read in this text file that we created from our mapped loci. We'll do this using the `readLines` function, which is just in the default `base` package.
+
+```{r, eval = FALSE}
+setwd("[your working directory]")
+```
+
+```{r}
+Brid_R1R2_BAM <- readLines("data/brid_R1R2_mapped.txt")
+```
+
+Next, we're going to parse this object by tabs and keep only the bits of information we care about for today, which are the name of our locus and which chromosome it mapped to.
+
+```{r}
+Brid_R1R2_pos <- matrix(nrow=length(Brid_R1R2_BAM),ncol = 2)
+for(i in 1:length(Brid_R1R2_BAM)){
+	temp <- strsplit(Brid_R1R2_BAM[i],"\t")[[1]]
+	Brid_R1R2_pos[i,] <- c(temp[c(1,3)])
+}
+```
+
+Let's preview this object to see what it looks like.
+
+```{r, comment = NA}
+Brid_R1R2_pos[1:30,]
+```
+
+What if we're only interested in loci that mapped to the genome? We can remove other loci by filtering out those with an asterisk in the second column.
+
+```{r}
+Brid_R1R2_posMatching <- Brid_R1R2_pos[Brid_R1R2_pos[,2]!="*",]
+```
+
+We can now check what proportion of our dataset was removed.
+```{r}
+1-(dim(Brid_R1R2_posMatching)[1]/dim(Brid_R1R2_pos)[1])
+```
+
+We might be tempted to interpret this as meaning that ~97% of our loci mapped to the genome. However, we probably have some entries from where a single locus mapped to more than one place! In reality, that happened relative few times in this dataset.
+
+<div class="alert alert-info">
+  <strong>Discussion:</strong> What might it mean if a locus mapped to more than one place in the genome?
+</div>
+
+However, we do have two rows for each locus—one each for R1 and R2. Let's simplify our data and keep just one entry for each locus (**note: this will also remove times when a locus has mapped to more than one place in the genome!**).
+
+```{r}
+Brid_R1R2_posMatching_reduced <- Brid_R1R2_posMatching[!duplicated(Brid_R1R2_posMatching[,1]),]
+```
+
+### Plot mapped loci.
+
+One simple question we might have is the distribution of our loci across the genome. Let's plot the number of loci that map to each of our contigs/scaffolds.
+
+```{r}
+barplot(table(as.character(Brid_R1R2_posMatching_reduced[,2])),
+        col = "orange", xlab = "", ylab = "",
+        main = "3RAD loci assembled against genome", xaxt = 'n', space = 0)
+axis (side = 1, labels = c("",""),
+      las = 2, at = 0.5+c(0,c(length(unique(Brid_R1R2_posMatching_reduced[,2][grep("NC_", Brid_R1R2_posMatching_reduced[,2])]))-1)),
+      cex.axis = 0.5, tick = TRUE)
+axis (side = 1, labels = c("chrom."),
+      las = 1, at = mean(c(0,c(length(unique(Brid_R1R2_posMatching_reduced[,2][grep("NC_", Brid_R1R2_posMatching_reduced[,2])]))-1))),
+      cex.axis = 1, tick = FALSE)
+mtext(side = 1, text = "Contig/Scaffold", line = 2)
+mtext(side = 2, text = "Number of Loci", line = 2.5)
+```
+
+<div class="alert alert-info">
+  <strong>Discussion:</strong> What do you notice about the distribution of our loci?
+</div>
+
+We can zoom and and look at only those loci that mapped to chromosomes.
+
+```{r}
+barplot(table(as.character(Brid_R1R2_posMatching_reduced[,2][grep("NC_", Brid_R1R2_posMatching_reduced[,2])])),
+        col = "orange", xlab = "", ylab = "",
+        main = "3RAD loci assembled against genome", xaxt = 'n', space = 0)
+axis (side = 1, labels = unique(Brid_R1R2_posMatching_reduced[,2][grep("NC_", Brid_R1R2_posMatching_reduced[,2])]),
+      las = 2, at = 0.5+c(0:c(length(unique(Brid_R1R2_posMatching_reduced[,2][grep("NC_", Brid_R1R2_posMatching_reduced[,2])]))-1)),
+      cex.axis = 0.5)
+mtext(side = 1, text = "Chromosome", line = 5)
+mtext(side = 2, text = "Number of Loci", line = 2.5)
+```
+
+<div class="alert alert-info">
+  <strong>Discussion:</strong> Does this distribution match what we might expect? How would you form your expectations?
+</div>
 
 ## Using Pronghorn
 As you've likely noticed throughout these tutorials, some of the methods we use in phylogenomics and population genomics are quite computationally intensive! Our example datasets are relatively small, but with even more data, the demands of these programs might far outpace what is available on your local computer.
 
 Fortunately, many research institutions support this kind of research through high-performance computing clusters, like the University of Nevada Reno's "Pronghorn". These are large and powerful groups of computers capable of conducting these analyses, and approved users can login remotely to do their work.
 
-In most cases, users need to run their programs by submitting a "job". This is special file that contains the command you want to run along with other important information (e.g., the kind of computing power you need, how long you'll need it, etc.). Pronghorn will then place your job in a queue and will run it once it's turn has come. 
+In most cases, users need to run their programs by submitting a "job". This is special file that contains the command you want to run along with other important information (e.g., the kind of computing power you need, how long you'll need it, etc.). Pronghorn will then place your job in a queue and will run it once it's turn has come.
+
+[Pronghorn uses a system called "Slurm" to manage these jobs](https://github.com/UNR-HPC/pronghorn/wiki/4.0-Submitting-jobs), and we enter a job into the queue be submitting a Slurm script. Below is an example of one such script:
+
+```{bash, comment = NA, echo = TRUE, eval = TRUE}
+cat data/example_script.sl
+```
+
+Each of the lines at the top indicate an important feature of the job. Here, we have told Pronghorn:
+
+* `--mem-per-cpu` : the amount of RAM dedicated to each CPU
+* `--job-name` : the name of our job
+* `--output` : where to print the output of our job (e.g., its status in `ipyrad`)
+* `-n 24` : the number of cores we are requesting; here, we've requested 24 cores
+* `-t` : the maximum allowable time for our job; here, we've requested two hours
+
+We would then submit the job by entering the following command into our Terminal:
+
+```{bash, eval = FALSE}
+sbatch example_script.sl
+```
