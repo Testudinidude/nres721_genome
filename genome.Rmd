@@ -87,7 +87,7 @@ Scrolling even further, we can look at the assembly information for each chromos
 
 Finally, we're ready to download the genome! We can do this by clicking the big blue "Download Assembly" button in the upper right hand corner. We want to keep the file type as "Genomic FASTA". **Note: You don't actually need to do this during class. This file is > 800 Mb, and it'll take a bit of time to download.**
 
-## Assembling loci in `bwa`
+## Mapping loci in `bwa`
 As we learned two weeks ago, we could assemble our raw 3RAD reads against this genome in `ipyrad`. Today, we're going to do something even simpler. We'll take the final loci we assembled *de novo* and just map those against the genome assembly. 
 
 <div class="alert alert-info">
@@ -245,6 +245,12 @@ As you've likely noticed throughout these tutorials, some of the methods we use 
 
 Fortunately, many research institutions support this kind of research through high-performance computing clusters, like the University of Nevada Reno's "Pronghorn". These are large and powerful groups of computers capable of conducting these analyses, and approved users can login remotely to do their work.
 
+Once you have an account, you can use the `ssh` command to login to a Pronghorn node from anywhere! An example of this command is below, after which you'd be prompted to enter your password.
+
+```{bash, eval = FALSE}
+ssh [your username]@pronghorn.rc.unr.edu
+```
+
 In most cases, users need to run their programs by submitting a "job". This is special file that contains the command you want to run along with other important information (e.g., the kind of computing power you need, how long you'll need it, etc.). Pronghorn will then place your job in a queue and will run it once it's turn has come.
 
 [Pronghorn uses a system called "Slurm" to manage these jobs](https://github.com/UNR-HPC/pronghorn/wiki/4.0-Submitting-jobs), and we enter a job into the queue be submitting a Slurm script. Below is an example of one such script:
@@ -265,4 +271,10 @@ We would then submit the job by entering the following command into our Terminal
 
 ```{bash, eval = FALSE}
 sbatch example_script.sl
+```
+
+We can check on the status of all jobs we've submitted with the following command:
+
+```{bash, eval = FALSE}
+sacct -u [your username]
 ```
