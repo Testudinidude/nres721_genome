@@ -124,7 +124,7 @@ head -n 10 data/Brid_R1.fasta
 So, this is a FASTA with one line for each locus. In its paired file (`Brid_R2.fasta`), we have the same data for the R2 side of the loci. Now, we're ready to map these loci against the reference genome, and we can do this with the `bwa mem` command. Below, we use this command and use `samtools` to modify the output and export it as a BAM file.
 
 ```{bash, eval = FALSE}
-bwa mem reference/GCF_000003625.3_OryCun2.0_genomic.fna data/Brid_R1.fasta loci_to_fasta/Brid_R2.fasta | samtools view -bS - | samtools sort - data/brid_R1_R2_mapped
+bwa mem reference/GCF_000003625.3_OryCun2.0_genomic.fna data/Brid_R1.fasta data/Brid_R2.fasta | samtools view -bS - | samtools sort - data/brid_R1_R2_mapped
 ```
 
 Now, we'll again use `samtools` to export our BAM file to a readable .txt file.
@@ -270,7 +270,7 @@ Each of the lines at the top indicate an important feature of the job. Here, we 
 We would then submit the job by entering the following command into our Terminal:
 
 ```{bash, eval = FALSE}
-sbatch example_script.sl
+sbatch data/example_script.sl
 ```
 
 We can check on the status of all jobs we've submitted with the following command:
