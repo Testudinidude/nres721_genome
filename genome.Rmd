@@ -32,7 +32,7 @@ library(devtools)
 ```
 
 <div class="alert alert-danger">
-  <strong>Note:</strong> This brief tutorial is written for UNR's NRES 721 as a basic introduction to the utility of full-genome data. **Students, if you wish to follow along, you can download all of the data we'll use from the `/data` directory in the Github repository [here](https://github.com/twpierson/nres721_genome) or from Dropbox by clicking on the link [here](https://www.dropbox.com/sh/24wkpb59n0mithq/AAB4h619hx-SAuyGFODQJc5pa?dl=0).** </div>
+  <strong>Note:</strong> This brief tutorial is written for UNR's NRES 721 as a basic introduction to the utility of full-genome data. **Students, if you wish to follow along, you can download all of the data we'll use by typing the `svn checkout https://github.com/twpierson/nres721_genome/trunk/data`  command in your working directory, from the `/data` directory in the Github repository [here](https://github.com/twpierson/nres721_genome), or from Dropbox by clicking on the link [here](https://www.dropbox.com/sh/24wkpb59n0mithq/AAB4h619hx-SAuyGFODQJc5pa?dl=0).** </div>
 
 ## Introduction
 In this tutorial, we're going to introduce full-genome assemblies and briefly discuss how they can be useful in population genetic and phylogenetic studies. For practical reasons, we have to move away from salamanders (`r emo::ji("frowning_face")`), because the only [chromosome-level reference genome](https://genome.cshlp.org/content/29/2/317.long) is 32 Gb! Nobody wants to deal with that for a tutorial.
